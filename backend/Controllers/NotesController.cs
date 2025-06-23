@@ -55,7 +55,7 @@ public class NotesController : ControllerBase
         return new NoteResponseDto
         {
             EncryptedText = note.EncryptedText,
-            LastModifiedToken = note.LastModifiedToken
+            LastModifiedToken = note.LastModifiedToken.ToString()
         };
     }
 
@@ -67,7 +67,7 @@ public class NotesController : ControllerBase
         if (note == null)
             return NotFound();
 
-        if (dto.LastModifiedToken != note.LastModifiedToken)
+        if (long.Parse(dto.LastModifiedToken) != note.LastModifiedToken)
             return Conflict(new { message = "Note has been modified by someone else." });
 
         note.EncryptedText = dto.EncryptedText;
@@ -76,6 +76,6 @@ public class NotesController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        return Ok(new { message = "Note updated successfully." });
+        return Ok(new { LastModifiedToken = note.LastModifiedToken.ToString() });
     }
 }

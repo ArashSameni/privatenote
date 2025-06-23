@@ -11,6 +11,6 @@ public class UpdateNoteDtoValidator : AbstractValidator<UpdateNoteDto>
             .NotEmpty().WithMessage("EncryptedText is required.");
 
         RuleFor(x => x.LastModifiedToken)
-            .GreaterThan(0).WithMessage("Invalid LastModifiedToken.");
+            .NotEmpty().WithMessage("LastModifiedToken is required.");
     }
 }

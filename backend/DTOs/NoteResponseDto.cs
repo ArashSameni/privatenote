@@ -3,5 +3,5 @@
 public class NoteResponseDto
 {
     public string EncryptedText { get; set; } = null!;
-    public long LastModifiedToken { get; set; }
+    public string LastModifiedToken { get; set; } = null!;
 }
