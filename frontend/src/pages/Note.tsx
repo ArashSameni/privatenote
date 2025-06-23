@@ -20,7 +20,6 @@ const NotePage: React.FC = () => {
   const [decryptedText, setDecryptedText] = useState("");
   const [lastModifiedToken, setLastModifiedToken] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   // Fetch note on mount
   useEffect(() => {
@@ -73,7 +72,6 @@ const NotePage: React.FC = () => {
     }
 
     setSaving(true);
-    setSuccess(false);
 
     try {
       const newEncrypted = CryptoJS.AES.encrypt(decryptedText, password).toString();
@@ -95,7 +93,6 @@ const NotePage: React.FC = () => {
 
       setEncryptedText(newEncrypted);
       setLastModifiedToken(responseData.lastModifiedToken); // update token here
-      setSuccess(true);
       toast.success("Note updated successfully!");
     } catch {
       toast.error("Failed to update note");
