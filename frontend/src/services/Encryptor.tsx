@@ -46,8 +46,13 @@ function decrypt(payload: EncryptedPayload, password: string): string {
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
   });
+  const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
 
-  return decrypted.toString(CryptoJS.enc.Utf8);
+  if (!decryptedText) {
+    throw new Error("Wrong password or corrupted data");
+  }
+
+  return decryptedText;
 }
 
 const Encryptor = {

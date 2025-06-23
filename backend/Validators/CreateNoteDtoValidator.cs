@@ -14,5 +14,8 @@ public class CreateNoteDtoValidator : AbstractValidator<CreateNoteDto>
             .Matches("^[a-z0-9_-]*$").WithMessage("Slug can only contain lower letters, numbers, underscores, and dashes.")
             .MaximumLength(32).WithMessage("Slug must be at most 32 characters.")
             .When(x => !string.IsNullOrWhiteSpace(x.Slug));
+
+        RuleFor(x => x.UpdatePassword)
+            .NotEmpty().WithMessage("UpdatePassword is required.");
     }
 }

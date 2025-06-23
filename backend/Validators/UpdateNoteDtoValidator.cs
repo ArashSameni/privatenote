@@ -12,5 +12,8 @@ public class UpdateNoteDtoValidator : AbstractValidator<UpdateNoteDto>
 
         RuleFor(x => x.LastModifiedToken)
             .NotEmpty().WithMessage("LastModifiedToken is required.");
+
+        RuleFor(x => x.UpdatePassword)
+            .NotEmpty().WithMessage("UpdatePassword is required.");
     }
 }

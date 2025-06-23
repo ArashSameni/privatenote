@@ -6,19 +6,20 @@ import Encryptor from "../services/Encryptor"
 
 const Home: React.FC = () => {
     const [slug, setSlug] = useState(nanoid(8).toLowerCase())
-    const [password, setPassword] = useState("")
+    const [readPassword, setReadPassword] = useState("")
+    const [updatePassword, setUpdatePassword] = useState("")
     const [note, setNote] = useState("")
     const navigate = useNavigate()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!password || !note) {
+        if (!readPassword || !note) {
             toast.error('Password and Note are required');
             return
         }
 
-        const encrypted = await Encryptor.encrypt(note, password);
+        const encrypted = Encryptor.encrypt(note, readPassword);
         const res = await fetch("/api/notes", {
             method: "POST",
             headers: {
@@ -27,13 +28,14 @@ const Home: React.FC = () => {
             body: JSON.stringify({
                 slug: slug,
                 encryptedText: encrypted.encryptedText,
+                updatePassword,
                 salt: encrypted.salt,
                 iv: encrypted.iv,
             }),
         })
 
         if (res.ok) {
-            navigate(`/note/${slug}`, { state: { password } })
+            navigate(`/note/${slug}`, { state: { password: readPassword } })
         } else {
             toast.error("Failed to create note")
         }
@@ -53,11 +55,20 @@ const Home: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <label className="block font-medium mb-1">Password</label>
+                    <label className="block font-medium mb-1">Read Password</label>
                     <input
                         type="text"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={readPassword}
+                        onChange={(e) => setReadPassword(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md"
+                    />
+                </div>
+                <div>
+                    <label className="block font-medium mb-1">Update Password</label>
+                    <input
+                        type="text"
+                        value={updatePassword}
+                        onChange={(e) => setUpdatePassword(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md"
                     />
                 </div>

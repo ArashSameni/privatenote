@@ -51,7 +51,7 @@ public class NotesController : ControllerBase
     [HttpGet("{slug}")]
     public async Task<ActionResult<NoteResponseDto>> GetNote(string slug)
     {
-        var note = await _db.Notes.FirstOrDefaultAsync(n => n.UrlSlug == slug);
+        var note = await _db.Notes.SingleOrDefaultAsync(n => n.UrlSlug == slug);
 
         if (note == null)
             return NotFound();
@@ -68,7 +68,7 @@ public class NotesController : ControllerBase
     [HttpPut("{slug}")]
     public async Task<IActionResult> UpdateNote(string slug, [FromBody] UpdateNoteDto dto)
     {
-        var note = await _db.Notes.FirstOrDefaultAsync(n => n.UrlSlug == slug);
+        var note = await _db.Notes.SingleOrDefaultAsync(n => n.UrlSlug == slug);
 
         if (note == null)
             return NotFound();

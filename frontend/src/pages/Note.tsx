@@ -16,7 +16,8 @@ const NotePage: React.FC = () => {
   const initialPassword = (location.state as { password?: string })?.password || "";
 
   const [loading, setLoading] = useState(true);
-  const [password, setPassword] = useState(initialPassword);
+  const [readPassword, setReadPassword] = useState(initialPassword);
+  const [updatePassword, setUpdatePassword] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [encryptedText, setEncryptedText] = useState<string | null>(null);
   const [decryptedText, setDecryptedText] = useState("");
@@ -48,18 +49,18 @@ const NotePage: React.FC = () => {
   const unlockNote = useCallback(async () => {
     if (!encryptedText || !salt || !iv) return;
     try {
-      const decrypted = await Encryptor.decrypt({
+      const decrypted = Encryptor.decrypt({
         encryptedText,
         salt,
         iv
-      }, password);
+      }, readPassword);
       setDecryptedText(decrypted);
       setIsUnlocked(true);
       toast.dismiss();
     } catch {
-      toast.error("Decryption failed");
+      toast.error("Password is not correct");
     }
-  }, [encryptedText, password, salt, iv]);
+  }, [encryptedText, readPassword, salt, iv]);
 
   useEffect(() => {
     if (encryptedText && initialPassword && !isUnlocked) {
@@ -77,12 +78,13 @@ const NotePage: React.FC = () => {
     setSaving(true);
 
     try {
-      const encrypted = await Encryptor.encrypt(decryptedText, password);
+      const encrypted = Encryptor.encrypt(decryptedText, readPassword);
       const res = await fetch(`/api/notes/${slug}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...encrypted,
+          updatePassword,
           lastModifiedToken,
         }),
       });
@@ -112,7 +114,7 @@ const NotePage: React.FC = () => {
   if (loading) return <p className="text-center mt-10">Loading note...</p>;
 
   if (!isUnlocked) {
-    return <PasswordInput password={password} setPassword={setPassword} unlockNote={unlockNote} />;
+    return <PasswordInput password={readPassword} setPassword={setReadPassword} unlockNote={unlockNote} />;
   }
 
   const copyNoteUrl = () => {
@@ -145,11 +147,21 @@ const NotePage: React.FC = () => {
       </div>
 
       <div>
-        <label className="block font-medium mb-1">Password</label>
+        <label className="block font-medium mb-1">Read Password</label>
         <input
           type="text"
-          value={password}
+          value={readPassword}
           readOnly
+          className="w-full px-3 py-2 border rounded-md"
+        />
+      </div>
+      
+      <div>
+        <label className="block font-medium mb-1">Update Password</label>
+        <input
+          type="text"
+          value={updatePassword}
+          onChange={(e) => setUpdatePassword(e.target.value)}
           className="w-full px-3 py-2 border rounded-md"
         />
       </div>
