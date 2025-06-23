@@ -129,9 +129,43 @@ const NotePage: React.FC = () => {
       });
   };
 
+  const refreshNote = async () => {
+    if (!slug) return;
+    setLoading(true);
+
+    try {
+      const res = await fetch(`/api/notes/${slug}`);
+      if (!res.ok) throw new Error("Failed to fetch note");
+
+      const data: NoteData = await res.json();
+      setEncryptedText(data.encryptedText);
+      setLastModifiedToken(data.lastModifiedToken);
+      setSalt(data.salt);
+      setIv(data.iv);
+
+      const decrypted = Encryptor.decrypt(data, readPassword);
+      setDecryptedText(decrypted);
+      toast.success("Note refreshed");
+    } catch {
+      toast.error("Failed to refresh note");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <div className="max-w-xl mx-auto mt-12 p-4 space-y-4">
-      <h2 className="text-2xl font-bold mb-6">Update Note</h2>
+      <div className="flex justify-between mb-6">
+        <h2 className="text-2xl font-bold">Update Note</h2>
+        <button
+          onClick={refreshNote}
+          disabled={loading}
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition"
+        >
+          Refresh
+        </button>
+      </div>
       <div>
         <label className="block font-medium mb-1">Link (Click to copy)</label>
         <input
@@ -155,7 +189,7 @@ const NotePage: React.FC = () => {
           className="w-full px-3 py-2 border rounded-md"
         />
       </div>
-      
+
       <div>
         <label className="block font-medium mb-1">Update Password</label>
         <input
