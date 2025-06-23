@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import CryptoJS from "crypto-js";
 import { toast } from "react-toastify";
+import Encryptor from "../services/encryptor";
 
 interface NoteData {
   encryptedText: string;
   lastModifiedToken: string;
+  salt: string;
+  iv: string;
 }
 
 const NotePage: React.FC = () => {
@@ -19,6 +21,8 @@ const NotePage: React.FC = () => {
   const [encryptedText, setEncryptedText] = useState<string | null>(null);
   const [decryptedText, setDecryptedText] = useState("");
   const [lastModifiedToken, setLastModifiedToken] = useState<string | null>(null);
+  const [salt, setSalt] = useState<string | null>(null);
+  const [iv, setIv] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Fetch note on mount
@@ -32,6 +36,8 @@ const NotePage: React.FC = () => {
         const data: NoteData = await res.json();
         setEncryptedText(data.encryptedText);
         setLastModifiedToken(data.lastModifiedToken);
+        setSalt(data.salt);
+        setIv(data.iv);
       })
       .catch(() => {
         toast.error("Failed to load note");
@@ -39,23 +45,21 @@ const NotePage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  // Unlock note with password
-  const unlockNote = useCallback(() => {
-    if (!encryptedText) return;
+  const unlockNote = useCallback(async () => {
+    if (!encryptedText || !salt || !iv) return;
     try {
-      const bytes = CryptoJS.AES.decrypt(encryptedText, password);
-      const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-      if (!decrypted) {
-        toast.error("Wrong password");
-        return;
-      }
+      const decrypted = await Encryptor.decrypt({
+        encryptedText,
+        salt,
+        iv
+      }, password);
       setDecryptedText(decrypted);
       setIsUnlocked(true);
       toast.dismiss();
     } catch {
-      toast.error("Decryption error");
+      toast.error("Decryption failed");
     }
-  }, [encryptedText, password]);
+  }, [encryptedText, password, salt, iv]);
 
   useEffect(() => {
     if (encryptedText && initialPassword && !isUnlocked) {
@@ -63,7 +67,6 @@ const NotePage: React.FC = () => {
     }
   }, [encryptedText, initialPassword, isUnlocked, unlockNote]);
 
-  // Update note
   const updateNote = async () => {
     if (!slug) return;
     if (lastModifiedToken === null) {
@@ -74,28 +77,33 @@ const NotePage: React.FC = () => {
     setSaving(true);
 
     try {
-      const newEncrypted = CryptoJS.AES.encrypt(decryptedText, password).toString();
+      const encrypted = await Encryptor.encrypt(decryptedText, password);
       const res = await fetch(`/api/notes/${slug}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          encryptedText: newEncrypted,
-          lastModifiedToken: lastModifiedToken,
+          ...encrypted,
+          lastModifiedToken,
         }),
       });
 
       if (!res.ok) {
-        throw new Error("Update failed");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Update failed");
       }
 
-      // Parse the response JSON to get the new token
       const responseData: { lastModifiedToken: string } = await res.json();
 
-      setEncryptedText(newEncrypted);
-      setLastModifiedToken(responseData.lastModifiedToken); // update token here
+      setEncryptedText(encrypted.encryptedText);
+      setSalt(encrypted.salt);
+      setIv(encrypted.iv);
+      setLastModifiedToken(responseData.lastModifiedToken);
       toast.success("Note updated successfully!");
-    } catch {
-      toast.error("Failed to update note");
+    } catch (error) {
+      let errorMessage = "Failed to update note";
+      if (error && typeof error === "object" && "message" in error)
+        errorMessage = String(error.message);
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }

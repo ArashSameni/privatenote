@@ -13,6 +13,12 @@ public class Note
     [Required]
     public string EncryptedText { get; set; } = null!;
 
+    [Required]
+    public string Salt { get; set; } = null!;
+
+    [Required]
+    public string IV { get; set; } = null!;
+
     public long LastModifiedToken { get; set; }
 
     public DateTime CreatedAt { get; set; }

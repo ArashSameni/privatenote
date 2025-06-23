@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import CryptoJS from "crypto-js"
 import { nanoid } from "nanoid"
 import { toast } from "react-toastify"
+import Encryptor from "../services/encryptor"
 
 const Home: React.FC = () => {
     const [slug, setSlug] = useState(nanoid(8).toLowerCase())
@@ -18,9 +18,7 @@ const Home: React.FC = () => {
             return
         }
 
-        // Encrypt note using AES
-        const encrypted = CryptoJS.AES.encrypt(note, password).toString()
-
+        const encrypted = await Encryptor.encrypt(note, password);
         const res = await fetch("/api/notes", {
             method: "POST",
             headers: {
@@ -28,7 +26,9 @@ const Home: React.FC = () => {
             },
             body: JSON.stringify({
                 slug: slug,
-                encryptedText: encrypted,
+                encryptedText: encrypted.encryptedText,
+                salt: encrypted.salt,
+                iv: encrypted.iv,
             }),
         })
 

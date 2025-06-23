@@ -33,6 +33,8 @@ public class NotesController : ControllerBase
             Id = Guid.NewGuid(),
             UrlSlug = slug,
             EncryptedText = dto.EncryptedText,
+            Salt = dto.Salt,
+            IV = dto.IV,
             CreatedAt = now,
             UpdatedAt = now,
             LastModifiedToken = now.Ticks
@@ -55,6 +57,8 @@ public class NotesController : ControllerBase
         return new NoteResponseDto
         {
             EncryptedText = note.EncryptedText,
+            Salt = note.Salt,
+            IV = note.IV,
             LastModifiedToken = note.LastModifiedToken.ToString()
         };
     }
@@ -68,9 +72,11 @@ public class NotesController : ControllerBase
             return NotFound();
 
         if (long.Parse(dto.LastModifiedToken) != note.LastModifiedToken)
-            return Conflict(new { message = "Note has been modified by someone else." });
+            return Conflict(new { message = "Note has been modified by someone else. Please refresh the page." });
 
         note.EncryptedText = dto.EncryptedText;
+        note.Salt = dto.Salt;
+        note.IV = dto.IV;
         note.UpdatedAt = DateTime.UtcNow;
         note.LastModifiedToken = note.UpdatedAt.Ticks;
 
