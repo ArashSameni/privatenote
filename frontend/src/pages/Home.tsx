@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { nanoid } from "nanoid"
 import { toast } from "react-toastify"
-import Encryptor from "../services/encryptor"
+import Encryptor from "../services/Encryptor"
 
 const Home: React.FC = () => {
     const [slug, setSlug] = useState(nanoid(8).toLowerCase())

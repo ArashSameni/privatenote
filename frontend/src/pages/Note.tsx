@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import Encryptor from "../services/encryptor";
+import Encryptor from "../services/Encryptor";
 
 interface NoteData {
   encryptedText: string;
