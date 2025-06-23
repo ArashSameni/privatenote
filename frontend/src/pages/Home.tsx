@@ -61,6 +61,9 @@ const Home: React.FC = () => {
                         value={readPassword}
                         onChange={(e) => setReadPassword(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck={false}
                     />
                 </div>
                 <div>
@@ -70,6 +73,9 @@ const Home: React.FC = () => {
                         value={updatePassword}
                         onChange={(e) => setUpdatePassword(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck={false}
                     />
                 </div>
                 <div>

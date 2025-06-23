@@ -187,6 +187,9 @@ const NotePage: React.FC = () => {
           value={readPassword}
           readOnly
           className="w-full px-3 py-2 border rounded-md"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
         />
       </div>
 
@@ -197,6 +200,9 @@ const NotePage: React.FC = () => {
           value={updatePassword}
           onChange={(e) => setUpdatePassword(e.target.value)}
           className="w-full px-3 py-2 border rounded-md"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
         />
       </div>
 
@@ -244,6 +250,9 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ password, setPassword, un
       placeholder="Password"
       required
       autoFocus
+      autoCorrect="off"
+      autoCapitalize="off"
+      spellCheck={false}
     />
     <button
       type="submit"
