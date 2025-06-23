@@ -17,7 +17,7 @@ obj/
 .idea/
 
 # ASP.NET Core
-appsettings.*.json
+appsettings.json
 *.db
 
 # User secrets

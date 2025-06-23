@@ -28,6 +28,7 @@ public class NotesController : ControllerBase
 
         var now = DateTime.UtcNow;
 
+        var updatePasswordHash = BcryptPasswordHasher.HashPassword(dto.UpdatePassword);
         var note = new Note
         {
             Id = Guid.NewGuid(),
@@ -35,6 +36,7 @@ public class NotesController : ControllerBase
             EncryptedText = dto.EncryptedText,
             Salt = dto.Salt,
             IV = dto.IV,
+            UpdatePasswordHash = updatePasswordHash,
             CreatedAt = now,
             UpdatedAt = now,
             LastModifiedToken = now.Ticks
@@ -70,6 +72,9 @@ public class NotesController : ControllerBase
 
         if (note == null)
             return NotFound();
+
+        if (!BcryptPasswordHasher.VerifyPassword(dto.UpdatePassword, note.UpdatePasswordHash))
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = "Invalid update password." });
 
         if (long.Parse(dto.LastModifiedToken) != note.LastModifiedToken)
             return Conflict(new { message = "Note has been modified by someone else. Please refresh the page." });
